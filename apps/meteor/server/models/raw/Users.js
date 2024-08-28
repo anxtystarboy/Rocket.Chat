@@ -1692,14 +1692,18 @@ export class UsersRaw extends BaseRaw {
 			},
 		};
 
-		const user = await this.findOneAndUpdate(query, update, { sort, returnDocument: 'after' });
+		const projection = {
+			username: 1,
+		};
+
+		const user = await this.findOneAndUpdate(query, update, { sort, projection, returnDocument: 'after' });
+
 		if (user?.value) {
 			return {
 				agentId: user.value._id,
 				username: user.value.username,
 			};
 		}
-		return null;
 	}
 
 	setLivechatStatus(userId, status) {

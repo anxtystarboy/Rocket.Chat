@@ -241,19 +241,16 @@ export class LivechatDepartmentAgentsRaw extends BaseRaw<ILivechatDepartmentAgen
 	}
 
 	async getOnlineForDepartment(
-		departmentId: string,
-		isLivechatEnabledWhenAgentIdle?: boolean,
+		departmentId: ILivechatDepartmentAgents['departmentId'],
+		departmentAgents?: Pick<ILivechatDepartmentAgents, 'username'>[],
 	): Promise<FindCursor<ILivechatDepartmentAgents> | undefined> {
-		const agents = await this.findByDepartmentId(departmentId).toArray();
+		const agents = departmentAgents || (await this.findByDepartmentId(departmentId).toArray());
 
 		if (agents.length === 0) {
 			return;
 		}
 
-		const onlineUsers = await Users.findOnlineUserFromList(
-			agents.map((a) => a.username),
-			isLivechatEnabledWhenAgentIdle,
-		).toArray();
+		const onlineUsers = await Users.findOnlineUserFromList(agents.map((a) => a.username)).toArray();
 
 		const onlineUsernames = onlineUsers.map((user) => user.username).filter(isStringValue);
 
@@ -289,11 +286,10 @@ export class LivechatDepartmentAgentsRaw extends BaseRaw<ILivechatDepartmentAgen
 
 	async getNextBotForDepartment(
 		departmentId: ILivechatDepartmentAgents['departmentId'],
+		agents?: ILivechatDepartmentAgents[],
 		ignoreAgentId?: ILivechatDepartmentAgents['agentId'],
-	): Promise<Pick<ILivechatDepartmentAgents, '_id' | 'agentId' | 'departmentId' | 'username'> | null | undefined> {
-		const agents = await this.findByDepartmentId(departmentId).toArray();
-
-		if (!agents.length) {
+	): Promise<Pick<ILivechatDepartmentAgents, '_id' | 'agentId' | 'departmentId' | 'username'> | undefined> {
+		if (!agents || agents.length === 0) {
 			return;
 		}
 
@@ -329,6 +325,10 @@ export class LivechatDepartmentAgentsRaw extends BaseRaw<ILivechatDepartmentAgen
 		};
 
 		const bot = await this.findOneAndUpdate(query, update, { sort, projection, returnDocument: 'after' });
+
+		if (!bot.value) {
+			return;
+		}
 
 		return bot.value;
 	}

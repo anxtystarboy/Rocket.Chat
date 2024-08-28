@@ -47,6 +47,7 @@ type Routing = {
 		agent?: SelectedAgent | null,
 		options?: { clientAction?: boolean; forwardingToDepartment?: { oldDepartmentId?: string; transferData?: any } },
 		room?: IOmnichannelRoom,
+		isAnyOnlineAgent?: boolean,
 	): Promise<(IOmnichannelRoom & { chatQueued?: boolean }) | null | void>;
 	unassignAgent(inquiry: ILivechatInquiryRecord, departmentId?: string, shouldQueue?: boolean): Promise<boolean>;
 	takeInquiry(
@@ -104,12 +105,16 @@ export const RoutingManager: Routing = {
 		return this.getMethod().getNextAgent(department, ignoreAgentId);
 	},
 
-	async delegateInquiry(inquiry, agent, options = {}, room) {
+	async delegateInquiry(inquiry, agent, options = {}, room, isAnyOnlineAgent) {
 		const { department, rid } = inquiry;
 
 		logger.debug(`Attempting to delegate inquiry ${inquiry._id}`);
 
-		if (!agent || (agent.username && !(await Users.findOneOnlineAgentByUserList(agent.username)) && !(await allowAgentSkipQueue(agent)))) {
+		if (
+			!agent ||
+			!isAnyOnlineAgent ||
+			(agent.username && !(await Users.findOneOnlineAgentByUserList(agent.username)) && !(await allowAgentSkipQueue(agent)))
+		) {
 			logger.debug(`Agent offline or invalid. Using routing method to get next agent for inquiry ${inquiry._id}`);
 
 			agent = await this.getNextAgent(department);

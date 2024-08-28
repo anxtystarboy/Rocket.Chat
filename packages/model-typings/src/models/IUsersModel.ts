@@ -265,7 +265,7 @@ export interface IUsersModel extends IBaseModel<IUser> {
 	findAgents(): FindCursor<ILivechatAgent>;
 	countAgents(): Promise<number>;
 	getNextAgent(ignoreAgentId?: string, extraQuery?: Filter<IUser>): Promise<{ agentId: string; username: string } | null>;
-	getNextBotAgent(ignoreAgentId?: string): Promise<{ agentId: string; username: string } | null>;
+	getNextBotAgent(ignoreAgentId?: string): Promise<{ agentId: string; username: string } | undefined>;
 	setLivechatStatus(userId: string, status: ILivechatAgentStatus): Promise<UpdateResult>;
 	makeAgentUnavailableAndUnsetExtension(userId: string): Promise<UpdateResult>;
 	setLivechatData(userId: string, data?: Record<string, any>): Promise<UpdateResult>;

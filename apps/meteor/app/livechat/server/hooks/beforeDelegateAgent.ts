@@ -5,17 +5,17 @@ import { settings } from '../../../settings/server';
 
 callbacks.add(
 	'livechat.beforeDelegateAgent',
-	async (agent, { department } = {}) => {
+	async (agent, { department, agents } = {}) => {
 		if (agent) {
 			return agent;
 		}
 
 		if (!settings.get('Livechat_assign_new_conversation_to_bot')) {
-			return null;
+			return;
 		}
 
 		if (department) {
-			return LivechatDepartmentAgents.getNextBotForDepartment(department);
+			return LivechatDepartmentAgents.getNextBotForDepartment(department, agents);
 		}
 
 		return Users.getNextBotAgent();
