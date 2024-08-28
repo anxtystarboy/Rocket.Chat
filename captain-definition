@@ -1,4 +1,4 @@
 {
   "schemaVersion": 2,
-  "dockerfilePath": "./apps/meteor/docker/Dockerfile"
+  "dockerfilePath": "./apps/meteor/docker/dockerfile"
 }
